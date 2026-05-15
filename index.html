@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tubod Municipality Agriculture Information System</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+:root {
+  --background: #ffffff; --foreground: #0a0a0b;
+  --card: #ffffff; --card-foreground: #0a0a0b;
+  --primary: #4f46e5; --primary-foreground: #f5f3ff;
+  --secondary: #f4f4f5; --secondary-foreground: #18181b;
+  --muted: #f4f4f5; --muted-foreground: #71717a;
+  --accent: #4f46e5; --accent-foreground: #f5f3ff;
+  --destructive: #ef4444; --success: #10b981; --warning: #f59e0b; --info: #3b82f6;
+  --border: #e4e4e7; --input: #e4e4e7; --ring: #a1a1aa;
+  --radius: 0.875rem;
+  --sidebar-w: 260px; --header-h: 56px;
+  --chart-1: #818cf8; --chart-2: #6366f1; --chart-3: #4f46e5; --chart-4: #4338ca; --chart-5: #3730a3;
+}
+.dark {
+  --background: #09090b; --foreground: #fafafa;
+  --card: #111113; --card-foreground: #fafafa;
+  --primary: #818cf8; --primary-foreground: #1e1b4b;
+  --secondary: #27272a; --secondary-foreground: #fafafa;
+  --muted: #27272a; --muted-foreground: #a1a1aa;
+  --border: #27272a; --input: #27272a; --ring: #3f3f46;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Figtree',system-ui,sans-serif; background:var(--background); color:var(--foreground); font-size:14px; line-height:1.6; }
+
+/* Sidebar */
+.sidebar { position:fixed; top:0; left:0; width:var(--sidebar-w); height:100vh; background:var(--card); border-right:1px solid var(--border); z-index:100; transition:transform .3s; overflow-y:auto; display:flex; flex-direction:column; }
+.sidebar-brand { padding:16px 20px; font-size:15px; font-weight:700; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); }
+.sidebar-brand .logo { width:32px; height:32px; background:var(--primary); border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--primary-foreground); font-weight:700; font-size:14px; }
+.sidebar-nav { padding:8px; flex:1; }
+.nav-section { padding:12px 12px 4px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--muted-foreground); }
+.nav-item { display:flex; align-items:center; gap:10px; padding:8px 12px; color:var(--muted-foreground); cursor:pointer; transition:.15s; font-size:13px; font-weight:500; border-radius:calc(var(--radius) - 2px); margin:1px 0; }
+.nav-item:hover { background:var(--muted); color:var(--foreground); }
+.nav-item.active { background:var(--primary); color:var(--primary-foreground); }
+.nav-item i { width:18px; text-align:center; font-size:14px; }
+.nav-item .badge { margin-left:auto; background:var(--primary); color:var(--primary-foreground); font-size:10px; padding:1px 7px; border-radius:10px; font-weight:600; }
+.nav-item.active .badge { background:rgba(255,255,255,.2); }
+.sidebar-footer { padding:12px; border-top:1px solid var(--border); }
+.user-card { display:flex; align-items:center; gap:10px; padding:8px; border-radius:calc(var(--radius) - 2px); }
+.user-avatar { width:32px; height:32px; border-radius:50%; background:var(--primary); color:var(--primary-foreground); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+.user-info { flex:1; min-width:0; }
+.user-info .name { font-size:12px; font-weight:600; color:var(--foreground); }
+.user-info .role { font-size:10px; color:var(--muted-foreground); }
+
+/* Header */
+.header { position:fixed; top:0; left:var(--sidebar-w); right:0; height:var(--header-h); background:var(--card); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:12px; z-index:90; transition:left .3s; }
+.hamburger { display:none; background:none; border:1px solid var(--border); border-radius:calc(var(--radius) - 4px); padding:6px 8px; cursor:pointer; font-size:16px; color:var(--foreground); }
+.search-box { flex:1; max-width:400px; position:relative; }
+.search-box input { width:100%; padding:7px 12px 7px 34px; border:1px solid var(--border); border-radius:calc(var(--radius) - 2px); font-size:13px; outline:none; background:var(--background); color:var(--foreground); transition:.2s; }
+.search-box input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(79,70,229,.1); }
+.search-box i { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--muted-foreground); font-size:12px; }
+.search-box .kbd { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:10px; color:var(--muted-foreground); background:var(--muted); padding:1px 6px; border-radius:4px; font-family:monospace; border:1px solid var(--border); }
+.search-results { position:absolute; top:100%; left:0; right:0; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); margin-top:4px; max-height:280px; overflow-y:auto; display:none; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+.search-results.show { display:block; }
+.search-result-item { padding:8px 12px; cursor:pointer; font-size:13px; border-bottom:1px solid var(--border); transition:.1s; }
+.search-result-item:hover { background:var(--muted); }
+.search-result-item:last-child { border-bottom:none; }
+.search-result-item mark { background:#fef08a; padding:0 2px; border-radius:2px; }
+.header-right { display:flex; align-items:center; gap:4px; margin-left:auto; }
+.h-btn { position:relative; background:none; border:none; padding:7px; border-radius:calc(var(--radius) - 4px); cursor:pointer; font-size:16px; color:var(--muted-foreground); transition:.15s; }
+.h-btn:hover { background:var(--muted); color:var(--foreground); }
+.h-btn .dot { position:absolute; top:4px; right:4px; width:7px; height:7px; background:var(--destructive); border-radius:50%; border:2px solid var(--card); }
+.theme-btn i.fa-moon { display:none; }
+.dark .theme-btn i.fa-sun { display:none; }
+.dark .theme-btn i.fa-moon { display:inline; }
+.profile-btn { display:flex; align-items:center; gap:8px; padding:4px 8px 4px 4px; border-radius:calc(var(--radius) - 2px); cursor:pointer; border:none; background:none; transition:.15s; }
+.profile-btn:hover { background:var(--muted); }
+.profile-btn span { font-size:13px; font-weight:500; color:var(--foreground); }
+.dropdown { position:absolute; top:calc(100% + 4px); right:0; width:200px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:0 10px 30px rgba(0,0,0,.08); display:none; z-index:200; overflow:hidden; }
+.dropdown.show { display:block; }
+.dropdown-item { display:flex; align-items:center; gap:8px; padding:8px 12px; font-size:13px; color:var(--foreground); cursor:pointer; transition:.1s; }
+.dropdown-item:hover { background:var(--muted); }
+.dropdown-item i { width:14px; color:var(--muted-foreground); font-size:13px; }
+.dropdown-sep { border-top:1px solid var(--border); }
+
+/* Main */
+.main { margin-left:var(--sidebar-w); margin-top:var(--header-h); padding:24px; transition:margin-left .3s; min-height:calc(100vh - var(--header-h)); }
+
+/* Cards */
+.card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.card-header { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+.card-header h3 { font-size:14px; font-weight:600; }
+.card-body { padding:18px; }
+
+/* Stats */
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+.stat-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; }
+.stat-card .icon { width:40px; height:40px; border-radius:calc(var(--radius) - 4px); display:flex; align-items:center; justify-content:center; font-size:16px; margin-bottom:10px; }
+.stat-card .value { font-size:26px; font-weight:700; }
+.stat-card .label { font-size:12px; color:var(--muted-foreground); font-weight:500; margin-top:2px; }
+.stat-card .change { font-size:11px; font-weight:600; margin-top:6px; display:flex; align-items:center; gap:4px; }
+.stat-card .change.up { color:var(--success); }
+.stat-card .change.down { color:var(--destructive); }
+
+/* Table */
+.table-toolbar { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+.t-input { padding:7px 12px 7px 32px; border:1px solid var(--border); border-radius:calc(var(--radius) - 2px); font-size:13px; outline:none; background:var(--background); color:var(--foreground); min-width:220px; transition:.2s; }
+.t-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(79,70,229,.1); }
+.t-select { padding:7px 12px; border:1px solid var(--border); border-radius:calc(var(--radius) - 2px); font-size:13px; background:var(--background); color:var(--foreground); outline:none; }
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; }
+th,td { padding:9px 14px; text-align:left; font-size:13px; border-bottom:1px solid var(--border); }
+th { font-weight:600; color:var(--muted-foreground); font-size:11px; text-transform:uppercase; letter-spacing:.5px; cursor:pointer; user-select:none; white-space:nowrap; background:var(--muted); }
+th:hover { color:var(--foreground); }
+tr:hover td { background:var(--muted); }
+.badge { padding:2px 10px; border-radius:20px; font-size:11px; font-weight:600; display:inline-block; }
+.badge-active { background:#d1fae5; color:#065f46; }
+.badge-inactive { background:#fee2e2; color:#991b1b; }
+.badge-pending { background:#fef3c7; color:#92400e; }
+.dark .badge-active { background:#064e3b; color:#6ee7b7; }
+.dark .badge-inactive { background:#450a0a; color:#fca5a5; }
+.dark .badge-pending { background:#451a03; color:#fcd34d; }
+.actions-cell { display:flex; gap:3px; }
+.act-btn { padding:5px 7px; border:none; border-radius:calc(var(--radius) - 4px); cursor:pointer; font-size:11px; transition:.15s; }
+.act-btn.view { background:rgba(79,70,229,.1); color:var(--primary); }
+.act-btn.edit { background:rgba(245,158,11,.1); color:#d97706; }
+.act-btn.del { background:rgba(239,68,68,.1); color:var(--destructive); }
+.act-btn:hover { opacity:.7; }
+.pagination { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-top:1px solid var(--border); font-size:13px; color:var(--muted-foreground); }
+.page-btns { display:flex; gap:3px; }
+.pg-btn { padding:5px 11px; border:1px solid var(--border); border-radius:calc(var(--radius) - 4px); background:var(--card); cursor:pointer; font-size:12px; font-weight:500; transition:.15s; color:var(--foreground); }
+.pg-btn:hover { background:var(--muted); }
+.pg-btn.active { background:var(--primary); color:var(--primary-foreground); border-color:var(--primary); }
+.pg-btn:disabled { opacity:.3; cursor:not-allowed; }
+.checkbox { width:15px; height:15px; cursor:pointer; accent-color:var(--primary); }
+
+/* Buttons */
+.btn { padding:7px 14px; border:none; border-radius:calc(var(--radius) - 2px); font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:.15s; font-family:inherit; }
+.btn:hover { opacity:.9; }
+.btn-primary { background:var(--primary); color:var(--primary-foreground); }
+.btn-secondary { background:var(--secondary); color:var(--secondary-foreground); }
+.btn-destructive { background:rgba(239,68,68,.1); color:var(--destructive); }
+.btn-ghost { background:transparent; color:var(--foreground); }
+.btn-ghost:hover { background:var(--muted); }
+.btn-outline { background:var(--card); border:1px solid var(--border); color:var(--foreground); }
+.btn-outline:hover { background:var(--muted); }
+.btn-sm { padding:5px 10px; font-size:12px; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.btn .spinner { width:14px; height:14px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite; }
+
+/* Modal */
+.modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:300; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:.2s; }
+.modal-backdrop.show { opacity:1; visibility:visible; }
+.modal { background:var(--card); border-radius:var(--radius); width:90%; max-width:520px; max-height:90vh; overflow-y:auto; transform:scale(.95); transition:.2s; border:1px solid var(--border); }
+.modal-backdrop.show .modal { transform:scale(1); }
+.modal-header { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.modal-header h3 { font-size:15px; font-weight:600; }
+.modal-close { background:none; border:none; font-size:18px; cursor:pointer; color:var(--muted-foreground); padding:4px; border-radius:calc(var(--radius) - 4px); transition:.15s; }
+.modal-close:hover { background:var(--muted); }
+.modal-body { padding:18px; }
+.modal-footer { padding:12px 18px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:6px; }
+
+/* Forms */
+.form-group { margin-bottom:14px; }
+.form-label { display:block; font-size:12px; font-weight:600; color:var(--muted-foreground); margin-bottom:5px; }
+.form-input,.form-select,.form-textarea { width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:calc(var(--radius) - 2px); font-size:13px; font-family:inherit; outline:none; transition:.2s; background:var(--background); color:var(--foreground); }
+.form-input:focus,.form-select:focus,.form-textarea:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(79,70,229,.1); }
+.form-input.error { border-color:var(--destructive); box-shadow:0 0 0 3px rgba(239,68,68,.1); }
+.form-error { color:var(--destructive); font-size:11px; margin-top:3px; display:none; }
+.form-error.show { display:block; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-textarea { resize:vertical; min-height:70px; }
+.toggle { position:relative; display:inline-block; width:40px; height:22px; }
+.toggle input { display:none; }
+.toggle-slider { position:absolute; inset:0; background:var(--border); border-radius:22px; cursor:pointer; transition:.2s; }
+.toggle-slider:before { content:''; position:absolute; width:16px; height:16px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
+.toggle input:checked+.toggle-slider { background:var(--primary); }
+.toggle input:checked+.toggle-slider:before { transform:translateX(18px); }
+
+/* Toast */
+.toast-container { position:fixed; top:70px; right:20px; z-index:400; display:flex; flex-direction:column; gap:6px; }
+.toast { padding:10px 14px; border-radius:calc(var(--radius) - 2px); color:#fff; font-size:13px; font-weight:500; display:flex; align-items:center; gap:8px; min-width:260px; animation:slideIn .3s; box-shadow:0 8px 24px rgba(0,0,0,.12); border:1px solid rgba(255,255,255,.1); }
+.toast.success { background:var(--success); }
+.toast.error { background:var(--destructive); }
+.toast.warning { background:var(--warning); }
+.toast.info { background:var(--info); }
+.toast-close { margin-left:auto; background:none; border:none; color:#fff; cursor:pointer; font-size:14px; opacity:.7; }
+
+/* Drop zone */
+.drop-zone { border:2px dashed var(--border); border-radius:var(--radius); padding:36px; text-align:center; cursor:pointer; transition:.2s; color:var(--muted-foreground); }
+.drop-zone:hover,.drop-zone.drag-over { border-color:var(--primary); background:rgba(79,70,229,.04); }
+.drop-zone i { font-size:28px; margin-bottom:6px; display:block; color:var(--primary); }
+.file-list { margin-top:14px; }
+.file-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border); border-radius:calc(var(--radius) - 2px); margin-bottom:6px; }
+.file-item .file-icon { font-size:18px; color:var(--primary); }
+.file-item .file-info { flex:1; }
+.file-item .file-name { font-size:13px; font-weight:500; }
+.file-item .file-size { font-size:11px; color:var(--muted-foreground); }
+.progress-bar { width:100%; height:5px; background:var(--muted); border-radius:3px; margin-top:5px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--primary); border-radius:3px; transition:width .3s; }
+
+/* Empty */
+.empty-state { text-align:center; padding:40px 20px; color:var(--muted-foreground); }
+.empty-state i { font-size:40px; margin-bottom:10px; opacity:.3; }
+
+/* Pages */
+.page { display:none; }
+.page.active { display:block; }
+.page-title { font-size:20px; font-weight:700; margin-bottom:2px; }
+.page-desc { font-size:13px; color:var(--muted-foreground); margin-bottom:18px; }
+
+/* Backdrop */
+.backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.3); z-index:95; }
+
+/* Animations */
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+
+/* Responsive */
+@media(max-width:768px) {
+  .sidebar { transform:translateX(-100%); }
+  .sidebar.open { transform:translateX(0); }
+  .backdrop.show { display:block; }
+  .header { left:0; }
+  .main { margin-left:0; }
+  .hamburger { display:block; }
+  .stats-grid { grid-template-columns:repeat(2,1fr); }
+  .form-row { grid-template-columns:1fr; }
+  .profile-btn span { display:none; }
+  .table-toolbar { flex-direction:column; align-items:stretch; }
+  .t-input { min-width:auto; }
+  .search-box .kbd { display:none; }
+}
+@media(max-width:480px) {
+  .stats-grid { grid-template-columns:1fr; }
+  .main { padding:14px; }
+  .card-header { flex-direction:column; align-items:flex-start; gap:8px; }
+}
+</style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand"><div class="logo">{{SYSTEM_INITIAL}}</div> Tubod-MAIS</div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <div class="nav-item active" onclick="showPage('dashboard')"><i class="fas fa-chart-pie"></i> Dashboard</div>
+    <div class="nav-item" onclick="showPage('records')"><i class="fas fa-table"></i> Farmers <span class="badge">20</span></div>
+    <div class="nav-section">Management</div>
+    <div class="nav-item" onclick="showPage('form')"><i class="fas fa-plus-circle"></i> Add New</div>
+    <div class="nav-item" onclick="showPage('files')"><i class="fas fa-folder-open"></i> File Manager</div>
+    <div class="nav-section">Account</div>
+    <div class="nav-item" onclick="showPage('profile')"><i class="fas fa-user-cog"></i> My Profile</div>
+    <div class="nav-item" onclick="showPage('settings')"><i class="fas fa-cog"></i> Settings</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card"><div class="user-avatar">A</div><div class="user-info"><div class="name">Admin User</div><div class="role">Administrator</div></div></div>
+  </div>
+</aside>
+<div class="backdrop" id="backdrop" onclick="toggleSidebar()"></div>
+
+<header class="header">
+  <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+  <div class="search-box">
+    <i class="fas fa-search"></i>
+    <input type="text" placeholder="Search farmers..." id="globalSearch" oninput="globalSearchHandler()" onfocus="globalSearchHandler()">
+    <span class="kbd">⌘K</span>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <div class="header-right">
+    <button class="h-btn theme-btn" onclick="toggleTheme()" title="Toggle theme"><i class="fas fa-sun"></i><i class="fas fa-moon"></i></button>
+    <button class="h-btn" onclick="showToast('info','No new notifications')"><i class="fas fa-bell"></i><span class="dot"></span></button>
+    <div style="position:relative">
+      <button class="profile-btn" onclick="toggleDropdown()"><div class="user-avatar" style="width:30px;height:30px;font-size:11px">A</div><span>Admin</span><i class="fas fa-chevron-down" style="font-size:9px;color:var(--muted-foreground);margin-left:2px"></i></button>
+      <div class="dropdown" id="profileDropdown">
+        <div class="dropdown-item" onclick="showPage('profile');toggleDropdown()"><i class="fas fa-user"></i> Profile</div>
+        <div class="dropdown-item" onclick="showPage('settings');toggleDropdown()"><i class="fas fa-cog"></i> Settings</div>
+        <div class="dropdown-sep"></div>
+        <div class="dropdown-item" style="color:var(--destructive)"><i class="fas fa-sign-out-alt"></i> Logout</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <h1 class="page-title">Dashboard</h1>
+  <p class="page-desc">Welcome back! Here's your overview of Tubod Municipality Agriculture Information System.</p>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="icon" style="background:rgba(79,70,229,.1);color:var(--primary)"><i class="fas fa-database"></i></div><div class="value" data-count="1847">0</div><div class="label">Registered Farmers</div><div class="change up"><i class="fas fa-trending-up"></i> +12%</div></div>
+    <div class="stat-card"><div class="icon" style="background:rgba(16,185,129,.1);color:var(--success)"><i class="fas fa-check-circle"></i></div><div class="value" data-count="2156">0</div><div class="label">Total Hectares</div><div class="change up"><i class="fas fa-trending-up"></i> +8%</div></div>
+    <div class="stat-card"><div class="icon" style="background:rgba(245,158,11,.1);color:var(--warning)"><i class="fas fa-clock"></i></div><div class="value" data-count="342">0</div><div class="label">Active Programs</div><div class="change down"><i class="fas fa-trending-down"></i> -3%</div></div>
+    <div class="stat-card"><div class="icon" style="background:rgba(129,140,248,.1);color:var(--chart-1)"><i class="fas fa-users"></i></div><div class="value" data-count="89">0</div><div class="label">Cooperatives</div><div class="change up"><i class="fas fa-trending-up"></i> +5%</div></div>
+  </div>
+  <div class="card"><div class="card-header"><h3>Recent Activity</h3><button class="btn btn-outline btn-sm"><i class="fas fa-download"></i> Export</button></div><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Action</th><th>Item</th><th>User</th><th>Date</th><th>Status</th></tr></thead><tbody id="activityTable"></tbody></table></div></div></div>
+</div>
+
+<!-- RECORDS -->
+<div class="page" id="page-records">
+  <h1 class="page-title">Farmers</h1>
+  <p class="page-desc">Manage all farmers records</p>
+  <div class="card">
+    <div class="card-header"><h3>All Records</h3><div style="display:flex;gap:6px;margin-left:auto"><button class="btn btn-outline btn-sm" onclick="exportCSV()"><i class="fas fa-download"></i> Export</button><button class="btn btn-destructive btn-sm" id="bulkDeleteBtn" style="display:none" onclick="bulkDelete()"><i class="fas fa-trash"></i> Delete Selected</button><button class="btn btn-primary btn-sm" onclick="openAddModal()"><i class="fas fa-plus"></i> Add New</button></div></div>
+    <div class="card-body">
+      <div class="table-toolbar"><div style="position:relative;flex:1"><i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted-foreground);font-size:12px"></i><input class="t-input" id="tableSearch" placeholder="Search records..." oninput="renderTable()" style="width:100%"></div><select class="t-select" id="statusFilter" onchange="renderTable()"><option value="">All Status</option><option value="Active">Active</option><option value="Pending">Pending</option><option value="Inactive">Inactive</option></select></div>
+      <div class="table-wrap"><table><thead><tr><th style="width:40px"><input type="checkbox" class="checkbox" id="selectAll" onchange="toggleSelectAll()"></th><th onclick="sortTable('col1')">Farmer Name</th><th onclick="sortTable('col2')">Barangay</th><th onclick="sortTable('col3')">Farm Area (ha)</th><th onclick="sortTable('status')">Status</th><th onclick="sortTable('date')">Date</th><th style="width:120px">Actions</th></tr></thead><tbody id="recordsTable"></tbody></table></div>
+      <div class="pagination"><span id="pageInfo"></span><div class="page-btns" id="pageButtons"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="page" id="page-form">
+  <h1 class="page-title">Add New Record</h1>
+  <p class="page-desc">Fill in the details to create a new record</p>
+  <div class="card"><div class="card-body">
+    <form id="mainForm" onsubmit="return submitForm(event)">
+      <div class="form-row"><div class="form-group"><label class="form-label">Farmer Name *</label><input class="form-input" id="f_col1" required><div class="form-error" id="e_col1">This field is required</div></div><div class="form-group"><label class="form-label">Barangay *</label><input class="form-input" id="f_col2" required><div class="form-error" id="e_col2">This field is required</div></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Farm Area (ha)</label><input class="form-input" id="f_col3"></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f_status"><option>Active</option><option>Pending</option><option>Inactive</option></select></div></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="f_desc" placeholder="Enter description..."></textarea></div>
+      <div class="form-group"><label class="form-label">Notifications</label><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:16px"><button type="button" class="btn btn-outline" onclick="document.getElementById('mainForm').reset()">Reset</button><button type="submit" class="btn btn-primary" id="formSubmitBtn"><i class="fas fa-save"></i> Save</button></div>
+    </form>
+  </div></div>
+</div>
+
+<!-- FILES -->
+<div class="page" id="page-files">
+  <h1 class="page-title">File Manager</h1>
+  <p class="page-desc">Upload and manage your files</p>
+  <div class="card"><div class="card-body">
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"><i class="fas fa-cloud-upload-alt"></i><p><strong>Drop files here</strong> or click to browse</p><p style="font-size:12px;margin-top:4px;color:var(--muted-foreground)">PDF, DOC, DOCX, XLS, PNG, JPG (Max 10MB)</p></div>
+    <input type="file" id="fileInput" style="display:none" multiple onchange="handleFiles(this.files)">
+    <div class="file-list" id="fileList"></div>
+  </div></div>
+</div>
+
+<!-- PROFILE -->
+<div class="page" id="page-profile">
+  <h1 class="page-title">My Profile</h1>
+  <p class="page-desc">Manage your account information</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <div class="card"><div class="card-header"><h3>Personal Info</h3></div><div class="card-body">
+      <div style="text-align:center;margin-bottom:16px"><div class="user-avatar" style="width:56px;height:56px;font-size:22px;margin:0 auto 6px">A</div><h3 style="font-size:15px">Admin User</h3><p style="color:var(--muted-foreground);font-size:12px">admin@quanby.com</p></div>
+      <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" value="Admin User"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" value="admin@quanby.com" type="email"></div>
+      <div class="form-group"><label class="form-label">Role</label><input class="form-input" value="Administrator" disabled></div>
+      <button class="btn btn-primary" onclick="showToast('success','Profile updated!')"><i class="fas fa-save"></i> Save</button>
+    </div></div>
+    <div class="card"><div class="card-header"><h3>Change Password</h3></div><div class="card-body">
+      <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" type="password" placeholder="••••••••"></div>
+      <div class="form-group"><label class="form-label">New Password</label><input class="form-input" type="password" placeholder="••••••••" id="newPass"></div>
+      <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" type="password" placeholder="••••••••" id="confirmPass"></div>
+      <button class="btn btn-primary" onclick="changePassword()"><i class="fas fa-lock"></i> Update</button>
+    </div></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <h1 class="page-title">Settings</h1>
+  <p class="page-desc">System configuration</p>
+  <div class="card"><div class="card-header"><h3>General</h3></div><div class="card-body">
+    <div class="form-group"><label class="form-label">System Name</label><input class="form-input" value="Tubod Municipality Agriculture Information System"></div>
+    <div class="form-group"><label class="form-label">Timezone</label><select class="form-select"><option>Asia/Manila (GMT+8)</option><option>UTC</option></select></div>
+    <div class="form-group"><label class="form-label">Theme</label><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="setTheme('light')"><i class="fas fa-sun"></i> Light</button><button class="btn btn-outline btn-sm" onclick="setTheme('dark')"><i class="fas fa-moon"></i> Dark</button></div></div>
+    <div class="form-group"><label class="form-label">Email Notifications</label><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+    <button class="btn btn-primary" onclick="showToast('success','Settings saved!')"><i class="fas fa-save"></i> Save</button>
+  </div></div>
+</div>
+
+</div>
+
+<!-- MODALS -->
+<div class="modal-backdrop" id="modalAdd"><div class="modal"><div class="modal-header"><h3 id="modalAddTitle">Add New Record</h3><button class="modal-close" onclick="closeModal('modalAdd')">&times;</button></div><div class="modal-body"><div class="form-row"><div class="form-group"><label class="form-label">Farmer Name *</label><input class="form-input" id="m_col1"></div><div class="form-group"><label class="form-label">Barangay *</label><input class="form-input" id="m_col2"></div></div><div class="form-row"><div class="form-group"><label class="form-label">Farm Area (ha)</label><input class="form-input" id="m_col3"></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="m_status"><option>Active</option><option>Pending</option><option>Inactive</option></select></div></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="m_desc"></textarea></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modalAdd')">Cancel</button><button class="btn btn-primary" onclick="saveRecord()"><i class="fas fa-save"></i> Save</button></div></div></div>
+
+<div class="modal-backdrop" id="modalDelete"><div class="modal" style="max-width:380px"><div class="modal-header"><h3>Delete Record</h3><button class="modal-close" onclick="closeModal('modalDelete')">&times;</button></div><div class="modal-body" style="text-align:center"><i class="fas fa-exclamation-triangle" style="font-size:40px;color:var(--destructive);margin-bottom:10px"></i><p>Are you sure you want to delete this record?</p><p style="color:var(--muted-foreground);font-size:12px;margin-top:4px">This action cannot be undone.</p></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modalDelete')">Cancel</button><button class="btn btn-primary" style="background:var(--destructive)" onclick="confirmDelete()"><i class="fas fa-trash"></i> Delete</button></div></div></div>
+
+<div class="modal-backdrop" id="modalView"><div class="modal"><div class="modal-header"><h3>Record Details</h3><button class="modal-close" onclick="closeModal('modalView')">&times;</button></div><div class="modal-body" id="viewModalBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modalView')">Close</button></div></div></div>
+
+<script>
+let records = [{"id":1,"col1":"Juan Carlos Santos","col2":"Poblacion","col3":"2.5","status":"Active","date":"Mar 15, 2024","desc":"Rice and corn farmer with 15 years experience"},{"id":2,"col1":"Maria Elena Rodriguez","col2":"Bonifacio","col3":"1.8","status":"Active","date":"Feb 28, 2024","desc":"Vegetable farming and livestock raising"},{"id":3,"col1":"Pedro Miguel Dela Cruz","col2":"San Jose","col3":"3.2","status":"Pending","date":"Apr 02, 2024","desc":"New farmer registration pending verification"},{"id":4,"col1":"Carmen Luz Fernandez","col2":"Tagumpay","col3":"0.75","status":"Active","date":"Jan 18, 2024","desc":"Organic vegetable production specialist"},{"id":5,"col1":"Roberto Antonio Mendoza","col2":"Mabuhay","col3":"4.1","status":"Active","date":"Mar 08, 2024","desc":"Coconut and banana plantation owner"},{"id":6,"col1":"Ana Rosa Villanueva","col2":"Esperanza","col3":"1.3","status":"Inactive","date":"Dec 12, 2023","desc":"Seasonal farming operations suspended"},{"id":7,"col1":"Jose Emmanuel Garcia","col2":"San Roque","col3":"2.8","status":"Active","date":"Apr 10, 2024","desc":"Integrated farming with fish pond"},{"id":8,"col1":"Elena Grace Pascual","col2":"Santa Cruz","col3":"1.6","status":"Active","date":"Feb 14, 2024","desc":"High-value crop production"},{"id":9,"col1":"Miguel Angel Torres","col2":"Poblacion","col3":"3.7","status":"Active","date":"Mar 22, 2024","desc":"Mechanized rice farming operations"},{"id":10,"col1":"Rosa Linda Aquino","col2":"Bonifacio","col3":"0.9","status":"Pending","date":"Apr 05, 2024","desc":"Backyard vegetable production"},{"id":11,"col1":"Francisco Javier Reyes","col2":"San Jose","col3":"2.1","status":"Active","date":"Jan 25, 2024","desc":"Organic farming certification holder"},{"id":12,"col1":"Luz Marina Castillo","col2":"Tagumpay","col3":"1.4","status":"Active","date":"Mar 30, 2024","desc":"Poultry and swine raising specialist"},{"id":13,"col1":"Carlos Eduardo Morales","col2":"Mabuhay","col3":"5.2","status":"Active","date":"Feb 05, 2024","desc":"Large-scale rice and corn production"},{"id":14,"col1":"Gloria Esperanza Silva","col2":"Esperanza","col3":"0.8","status":"Inactive","date":"Nov 18, 2023","desc":"Temporary farming cessation"},{"id":15,"col1":"Antonio Rafael Cruz","col2":"San Roque","col3":"2.9","status":"Active","date":"Apr 08, 2024","desc":"Mixed cropping with livestock"},{"id":16,"col1":"Marilyn Joy Gutierrez","col2":"Santa Cruz","col3":"1.7","status":"Active","date":"Mar 12, 2024","desc":"Flower and ornamental plant production"},{"id":17,"col1":"Eduardo Vicente Lopez","col2":"Poblacion","col3":"3.4","status":"Pending","date":"Apr 12, 2024","desc":"Farm expansion application processing"},{"id":18,"col1":"Teodora Paz Ramos","col2":"Bonifacio","col3":"1.2","status":"Active","date":"Feb 20, 2024","desc":"Traditional rice farming methods"},{"id":19,"col1":"Reynaldo Jose Martinez","col2":"San Jose","col3":"2.6","status":"Active","date":"Mar 25, 2024","desc":"Climate-smart agriculture practitioner"},{"id":20,"col1":"Nelia Carmen Flores","col2":"Tagumpay","col3":"1.1","status":"Active","date":"Apr 01, 2024","desc":"Women's cooperative member and leader"}];
+let currentPage=1,perPage=10,sortField='',sortDir='asc',editId=null,deleteId=null,selectedIds=new Set(),uploadedFiles=[];
+
+function showPage(n){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+n)?.classList.add('active');document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(i=>{if(i.getAttribute('onclick')?.includes("'"+n+"'"))i.classList.add('active')});if(window.innerWidth<=768){document.getElementById('sidebar').classList.remove('open');document.getElementById('backdrop').classList.remove('show')}window.scrollTo(0,0)}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('backdrop').classList.toggle('show')}
+function toggleDropdown(){document.getElementById('profileDropdown').classList.toggle('show')}
+function toggleTheme(){document.documentElement.classList.toggle('dark');localStorage.setItem('theme',document.documentElement.classList.contains('dark')?'dark':'light')}
+function setTheme(t){document.documentElement.className=t;localStorage.setItem('theme',t);showToast('success','Theme updated!')}
+document.addEventListener('click',e=>{if(!e.target.closest('.profile-btn')&&!e.target.closest('.dropdown'))document.getElementById('profileDropdown').classList.remove('show');if(!e.target.closest('.search-box'))document.getElementById('searchResults').classList.remove('show')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.show').forEach(m=>m.classList.remove('show'));if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('globalSearch').focus()}});
+if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark');
+
+function showToast(t,m){const c=document.getElementById('toastContainer'),d=document.createElement('div');d.className='toast '+t;d.innerHTML='<i class="fas fa-'+({success:'check-circle',error:'times-circle',warning:'exclamation-triangle',info:'info-circle'}[t])+'"></i> '+m+' <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>';c.appendChild(d);setTimeout(()=>d.remove(),3500)}
+function openModal(i){document.getElementById(i).classList.add('show')}
+function closeModal(i){document.getElementById(i).classList.remove('show')}
+document.querySelectorAll('.modal-backdrop').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')})});
+
+function getFiltered(){let d=[...records];const s=document.getElementById('tableSearch').value.toLowerCase(),f=document.getElementById('statusFilter').value;if(s)d=d.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(s)));if(f)d=d.filter(r=>r.status===f);if(sortField)d.sort((a,b)=>{const av=a[sortField]||'',bv=b[sortField]||'';return sortDir==='asc'?String(av).localeCompare(String(bv)):String(bv).localeCompare(String(av))});return d}
+function renderTable(){const d=getFiltered(),st=(currentPage-1)*perPage,pd=d.slice(st,st+perPage),tb=document.getElementById('recordsTable');if(!d.length){tb.innerHTML='<tr><td colspan="7"><div class="empty-state"><i class="fas fa-inbox"></i><p>No records found</p></div></td></tr>'}else{tb.innerHTML=pd.map(r=>`<tr><td><input type="checkbox" class="checkbox" ${selectedIds.has(r.id)?'checked':''} onchange="toggleSelect(${r.id})"></td><td><strong>${r.col1}</strong></td><td>${r.col2}</td><td>${r.col3||'-'}</td><td><span class="badge badge-${r.status.toLowerCase()}">${r.status}</span></td><td>${r.date}</td><td><div class="actions-cell"><button class="act-btn view" onclick="viewRecord(${r.id})" title="View"><i class="fas fa-eye"></i></button><button class="act-btn edit" onclick="editRecord(${r.id})" title="Edit"><i class="fas fa-edit"></i></button><button class="act-btn del" onclick="deleteRecord(${r.id})" title="Delete"><i class="fas fa-trash"></i></button></div></td></tr>`).join('')}const tp=Math.ceil(d.length/perPage)||1;document.getElementById('pageInfo').textContent=`Showing ${d.length?st+1:0}-${Math.min(st+perPage,d.length)} of ${d.length}`;let b=`<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage<=1?'disabled':''}><i class="fas fa-chevron-left"></i></button>`;for(let i=1;i<=tp;i++)b+=`<button class="pg-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;b+=`<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage>=tp?'disabled':''}><i class="fas fa-chevron-right"></i></button>`;document.getElementById('pageButtons').innerHTML=b;document.getElementById('bulkDeleteBtn').style.display=selectedIds.size?'inline-flex':'none'}
+function goPage(n){const mx=Math.ceil(getFiltered().length/perPage);currentPage=Math.max(1,Math.min(n,mx));renderTable()}
+function sortTable(f){if(sortField===f)sortDir=sortDir==='asc'?'desc':'asc';else{sortField=f;sortDir='asc'}renderTable()}
+function toggleSelect(id){selectedIds.has(id)?selectedIds.delete(id):selectedIds.add(id);renderTable()}
+function toggleSelectAll(){const a=document.getElementById('selectAll').checked,d=getFiltered().slice((currentPage-1)*perPage,currentPage*perPage);d.forEach(r=>a?selectedIds.add(r.id):selectedIds.delete(r.id));renderTable()}
+function openAddModal(){editId=null;document.getElementById('modalAddTitle').textContent='Add New Record';['m_col1','m_col2','m_col3','m_desc'].forEach(i=>document.getElementById(i).value='');document.getElementById('m_status').value='Active';openModal('modalAdd')}
+function editRecord(id){const r=records.find(x=>x.id===id);if(!r)return;editId=id;document.getElementById('modalAddTitle').textContent='Edit Record';document.getElementById('m_col1').value=r.col1;document.getElementById('m_col2').value=r.col2;document.getElementById('m_col3').value=r.col3||'';document.getElementById('m_status').value=r.status;document.getElementById('m_desc').value=r.desc||'';openModal('modalAdd')}
+function saveRecord(){const c1=document.getElementById('m_col1').value.trim(),c2=document.getElementById('m_col2').value.trim();if(!c1||!c2){showToast('error','Please fill required fields');return}const d={col1:c1,col2:c2,col3:document.getElementById('m_col3').value.trim(),status:document.getElementById('m_status').value,desc:document.getElementById('m_desc').value.trim(),date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})};if(editId){const i=records.findIndex(r=>r.id===editId);if(i>=0)Object.assign(records[i],d);showToast('success','Record updated!')}else{d.id=Date.now();records.unshift(d);showToast('success','Record added!')}closeModal('modalAdd');renderTable();animateCounters()}
+function deleteRecord(id){deleteId=id;openModal('modalDelete')}
+function confirmDelete(){records=records.filter(r=>r.id!==deleteId);selectedIds.delete(deleteId);closeModal('modalDelete');renderTable();animateCounters();showToast('success','Record deleted')}
+function bulkDelete(){records=records.filter(r=>!selectedIds.has(r.id));selectedIds.clear();renderTable();animateCounters();showToast('success','Selected records deleted')}
+function viewRecord(id){const r=records.find(x=>x.id===id);if(!r)return;document.getElementById('viewModalBody').innerHTML=`<div style="display:grid;gap:10px"><div><span class="form-label">Farmer Name</span><p style="font-weight:500">${r.col1}</p></div><div><span class="form-label">Barangay</span><p>${r.col2}</p></div><div><span class="form-label">Farm Area (ha)</span><p>${r.col3||'-'}</p></div><div><span class="form-label">Status</span><p><span class="badge badge-${r.status.toLowerCase()}">${r.status}</span></p></div><div><span class="form-label">Description</span><p style="color:var(--muted-foreground)">${r.desc||'No description'}</p></div></div>`;openModal('modalView')}
+function exportCSV(){const d=getFiltered();let c='Farmer Name,Barangay,Farm Area (ha),Status,Date\n';d.forEach(r=>c+=`"${r.col1}","${r.col2}","${r.col3||''}","${r.status}","${r.date}"\n`);const b=new Blob([c],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='farmers_export.csv';a.click();showToast('success','CSV exported!')}
+function submitForm(e){e.preventDefault();let v=true;['f_col1','f_col2'].forEach(i=>{const el=document.getElementById(i),er=document.getElementById(i.replace('f_','e_'));if(!el.value.trim()){el.classList.add('error');er.classList.add('show');v=false}else{el.classList.remove('error');er.classList.remove('show')}});if(!v){showToast('error','Please fix errors');return false}const btn=document.getElementById('formSubmitBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Saving...';setTimeout(()=>{records.unshift({id:Date.now(),col1:document.getElementById('f_col1').value,col2:document.getElementById('f_col2').value,col3:document.getElementById('f_col3').value,status:document.getElementById('f_status').value,desc:document.getElementById('f_desc').value,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})});document.getElementById('mainForm').reset();btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Save';showToast('success','Record saved!');renderTable();animateCounters()},800);return false}
+const dz=document.getElementById('dropZone');dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over')});dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');handleFiles(e.dataTransfer.files)});
+function handleFiles(fs){Array.from(fs).forEach(f=>{if(f.size>10*1024*1024){showToast('error',`${f.name} too large`);return}const id=Date.now()+Math.random();uploadedFiles.push({id,name:f.name,size:f.size,progress:0});renderFiles();let p=0;const iv=setInterval(()=>{p+=Math.random()*30;if(p>=100){p=100;clearInterval(iv);showToast('success',`${f.name} uploaded!`)}const u=uploadedFiles.find(x=>x.id===id);if(u)u.progress=p;renderFiles()},300)})}
+function renderFiles(){const c=document.getElementById('fileList');if(!uploadedFiles.length){c.innerHTML='';return}c.innerHTML=uploadedFiles.map(f=>`<div class="file-item"><i class="fas fa-file file-icon"></i><div class="file-info"><div class="file-name">${f.name}</div><div class="file-size">${(f.size/1024).toFixed(1)} KB</div>${f.progress<100?`<div class="progress-bar"><div class="progress-fill" style="width:${f.progress}%"></div></div>`:''}</div>${f.progress>=100?`<button class="btn btn-outline btn-sm" onclick="downloadFile('${f.name}')"><i class="fas fa-download"></i></button><button class="btn btn-destructive btn-sm" onclick="removeFile(${f.id})"><i class="fas fa-trash"></i></button>`:''}</div>`).join('')}
+function removeFile(id){uploadedFiles=uploadedFiles.filter(f=>f.id!==id);renderFiles();showToast('success','File removed')}
+function downloadFile(n){const b=new Blob([`Content: ${n}`],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();showToast('success','Download started')}
+function changePassword(){const n=document.getElementById('newPass').value,c=document.getElementById('confirmPass').value;if(!n||n.length<6){showToast('error','Min 6 characters');return}if(n!==c){showToast('error','Passwords don\'t match');return}showToast('success','Password updated!');document.getElementById('newPass').value='';document.getElementById('confirmPass').value=''}
+function globalSearchHandler(){const q=document.getElementById('globalSearch').value.toLowerCase(),b=document.getElementById('searchResults');if(!q){b.classList.remove('show');return}const r=records.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(q))).slice(0,6);b.innerHTML=r.length?r.map(r=>`<div class="search-result-item" onclick="showPage('records');document.getElementById('tableSearch').value='${q}';renderTable();document.getElementById('searchResults').classList.remove('show')"><strong>${hl(r.col1,q)}</strong> — ${hl(r.col2,q)} <span class="badge badge-${r.status.toLowerCase()}" style="float:right;font-size:10px">${r.status}</span></div>`).join(''):'<div class="search-result-item" style="color:var(--muted-foreground)">No results</div>';b.classList.add('show')}
+function hl(t,q){if(!q)return t;return String(t).replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi'),'<mark>$1</mark>')}
+function animateCounters(){document.querySelectorAll('.stat-card .value').forEach(el=>{const t=parseInt(el.dataset.count)||0;let c=0;const s=Math.ceil(t/30),iv=setInterval(()=>{c+=s;if(c>=t){c=t;clearInterval(iv)}el.textContent=c.toLocaleString()},30)})}
+function renderActivity(){const acts=['Created','Updated','Reviewed','Approved','Exported'],users=['Admin','Maria Santos','Juan Cruz','Ana Garcia'];document.getElementById('activityTable').innerHTML=records.slice(0,6).map(r=>`<tr><td>${acts[Math.floor(Math.random()*acts.length)]}</td><td>${r.col1}</td><td>${users[Math.floor(Math.random()*users.length)]}</td><td>${r.date}</td><td><span class="badge badge-${r.status.toLowerCase()}">${r.status}</span></td></tr>`).join('')}
+renderTable();renderActivity();animateCounters();
+</script>
+</body>
+</html>
